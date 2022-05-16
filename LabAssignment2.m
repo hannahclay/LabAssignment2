@@ -15,15 +15,16 @@ startpose =transl(0.4,-0.3,0);
 tablepose = transl(0,0,0); 
 
 
-    pill_1 = [-0.5;0.5;0]; % position of each bottle
-    pill_2 = [0.4;-0.6;0];
-    pill_3 = [-0.85;-1;0];
-    pill_4 = [-0.45;0.85;0];
-    pill_5 = [0.7;0.2;0];
-    pill_6 = [0.9;0.9;0];
-    pill_7 = [0.75;-0.38;0];
-    pill_8 = [1;-0.5;0]; 
-    pill_9 = [1;1;0];
+    pill_1 = [0.25;-0.2;0]; % initial position of each bottle
+    pill_2 = [0.25;-0.3;0];
+    pill_3 = [0.25;-0.4;0];
+    pill_4 = [0;-0.2;0];
+    pill_5 = [0;-0.3;0];
+    pill_6 = [0;-0.4;0];
+    pill_7 = [-0.25;-0.2;0];
+    pill_8 = [-0.25;-0.3;0]; 
+    pill_9 = [-0.25;-0.4;0];
+%     box = ;
 
 
     obj.Locationforpills(pill_1,pill_2,pill_3,pill_4,pill_5,pill_6,pill_7,pill_8,pill_9); %call placement of pills fuction
@@ -35,14 +36,14 @@ tablepose = transl(0,0,0);
 end
 
 function GenerateEnvironment(obj,centre,tablepose)    
-    [f,v,data] = plyread('tabletocentre.ply','tri');
+    [f,v,data] = plyread('table.ply','tri');
     
     % Scale the colours to be 0-to-1 (they are originally 0-to-255)
     vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
     
     x_table = tablepose(1,4);
     y_table = tablepose(2,4);
-    Offset = centre(3,4) - 0.495; % table is 0.495m tall, and so this is to asjust the offset of the table so that the robot can sit on top of it
+    Offset = centre(3,4) - 0.554; % table is 0.495m tall, and so this is to asjust the offset of the table so that the robot can sit on top of it
     
     trisurf(f,v(:,1) + x_table, v(:,2) + y_table, v(:,3) + Offset,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
     hold on
@@ -51,21 +52,36 @@ function GenerateEnvironment(obj,centre,tablepose)
     view(3);
     
     
+    for i = 1:9
+        [f,v,data] = plyread('pill_bottle.ply','tri');
+        % find corner size (vertex) of the pills
+        determinesize = size(v,1);
+        %moving the origin of the pill to the top of the table
+        Originpoint = (sum(v)/determinesize); 
+        pillVertex = v - repmat(Originpoint,determinesize,1);
+        
+        % Scale the colours to be 0-to-1 (they are originally 0-to-255
+        vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+        % Then plot the trisurf
+        obj.pillMatrix{i} = trisurf(f,pillVertex(:,1) + obj.pill_height{i}(1,4), ...
+            pillVertex(:,2) + obj.pill_height{i}(2,4), pillVertex(:,3) + (0.06671/2), ...
+            'FaceVertexCData',vertexColours,'EdgeColor', 'interp','EdgeLighting','flat');
+    end
+    
+    
+    
     [f,v,data] = plyread('fire_extinguisher.ply','tri');
     % Scale the colours to be 0-to-1 (they are originally 0-to-255)
     vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
     % Then plot the trisurf
-    trisurf(f,v(:,1) + 3, v(:,2) + 2.5, v(:,3) + 0 ,'FaceVertexCData',...
-        vertexColours,'EdgeColor','interp','EdgeLighting','flat');
-    
+    trisurf(f,v(:,1) - 1, v(:,2) - 1, v(:,3) + 0 ,'FaceVertexCData',...
+    vertexColours,'EdgeColor','interp','EdgeLighting','flat');
 
-    
-    
-       surf([-5,-5;5,5],[-3.5,3;-3.5,3],[-0.5,-0.5;-0.5,-0.5],...
-           'CData',imread('concrete.jpg'),'FaceColor','texturemap');
+       surf([-2.5,-2.5;2.5,2.5],[-2,2;-2,2],[-0.5,-0.5;-0.5,-0.5],...
+       'CData',imread('concrete.jpg'),'FaceColor','texturemap');
        
-       surf([-5,-5;5,5],[-3.5,3;-3.5,3],[-0.5,-0.5;-0.5,-0.5],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
-      
+       surf([0.1,-0.1;0.1,-0.1],[0.1,0.1;0.2,0.2],[0,0;0,0],...
+       'CData',imread('pick_up_sign.jpg'),'FaceColor','texturemap');
   
        disp('Generating Dobot');
        dobot = Dobot_A2();                                                       
