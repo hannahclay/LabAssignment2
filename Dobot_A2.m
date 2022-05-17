@@ -46,7 +46,7 @@ end
 % colour them in if data is available 
 function PlotAndColourRobot(self)%robot,workspace)
     for linkIndex = 0:self.model.n
-        [ faceData, vertexData, plyData{linkIndex+1} ] = plyread(['DobotLink',num2str(linkIndex),'.ply'],'tri'); %#ok<AGROW>
+        [ faceData, vertexData, plyData{linkIndex+1} ] = plyread(['dobotLink',num2str(linkIndex),'.ply'],'tri'); %#ok<AGROW>
         self.model.faces{linkIndex+1} = faceData;
         self.model.points{linkIndex+1} = vertexData;
     end
