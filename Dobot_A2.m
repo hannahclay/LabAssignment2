@@ -2,11 +2,8 @@ classdef Dobot_A2 < handle
     properties
         %> robot model
         model;
-        
         workspace = [-1 1 -1 1 -0.3 1]; 
-%         q = [0 pi/4 pi/2 pi/4 0];
         q = [0 pi/4 pi/4 0 0];
-%         q = [0 0 0 0 0];
     end
     
     methods (Static)%% Calculation for robot pose
@@ -41,7 +38,7 @@ function GetDobot(self)
     L4.offset = -pi/4;
       
     self.model = SerialLink([L1 L2 L3 L4 L5],'name','Dobot');
-    self.model.base = self.model.base * transl(0,0,0.2);
+    self.model.base = self.model.base * transl(0,0,0.1);
 %    self.model.plot(self.q)
 end
 %% PlotAndColourRobot

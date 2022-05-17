@@ -16,7 +16,7 @@ classdef GreenPills < handle
        end
        function location(self,GreenPillsPose)
         % After saving in blender then load the triangle mesh
-        [f,v,data] = plyread('pill_bottle.ply','tri');
+        [f,v,data] = plyread('GreenPills.ply','tri');
 
         % Get vertex count
         self.GreenPillsVertexCount = size(v,1);

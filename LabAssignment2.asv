@@ -1,27 +1,25 @@
 classdef LabAssignment2 < handle
     properties
-
         Dobot_A2 %Robot class
         workspace = [-5 5 -3 3 -0.5 2];
         pill_height = {};        
         pillMatrix = {};
-
-        end
+        
+    end
     
     methods
-function obj = LabAssignment2(tablepose) %constructor
+function obj = LabAssignment2(traj) %constructor
 
     startpose =transl(0.4,-0.3,0);
     tablepose = transl(0,0,0); 
     obj.GenerateEnvironment(startpose,tablepose); %call generate environment fuction
+    obj.PickUpTrajectory(traj); %call trajectory fuction
     disp('Press Enter to Continue');
-
     pause();
 end
 
 function GenerateEnvironment(obj,centre,tablepose)    
-    
-    %ENVIRONMENT
+
     [f,v,data] = plyread('table.ply','tri');
     
     % Scale the colours to be 0-to-1 (they are originally 0-to-255)
@@ -50,54 +48,368 @@ function GenerateEnvironment(obj,centre,tablepose)
        
        surf([0.1,-0.1;0.1,-0.1],[0.1,0.1;0.2,0.2],[0,0;0,0],...
        'CData',imread('pick_up_sign.jpg'),'FaceColor','texturemap');
-  %ENVIRONMENT
-  
-  %Generating pills and robot
-       disp('Generating Dobot');
+
+end
+
+function PickUpTrajectory(obj,traj)  
+        
+       disp('Generating Dobot'); %generating robot
        dobot = Dobot_A2;
        qHome1 = dobot.model.getpos;
+         
+       Boxinitpos = BoxClass(transl(0.25,0,0.03));  
        
        
-       Boxinitpos = BoxClass(transl(0.25,0,0.03)*rot();  
+       Green1 = GreenPills(transl(0.1,-0.1,0.03));  %0.03 is the height of the pill bottle, translating so that they sit on top of the table
+       Green2 = GreenPills(transl(0.1,-0.175,0.03));
+       Green3 = GreenPills(transl(0.1,-0.25,0.03));
        
        
-       Green1 = GreenPills(transl(0.25,-0.2,0.03));  %0.03 is the height of the pill bottle, translating so that they sit on top of the table
-       Green2 = GreenPills(transl(0.25,-0.3,0.03));
-       Green3 = GreenPills(transl(0.25,-0.4,0.03));
+       Purple1 = PurplePills(transl(-0.1,-0.1,0.03));  
+       Purple2 = PurplePills(transl(-0.1,-0.175,0.03));
+       Purple3 = PurplePills(transl(-0.1,-0.25,0.03));
        
-       Orange1 = OrangePills(transl(0,-0.2,0.03));  
-       Orange2 = OrangePills(transl(0,-0.3,0.03));
-       Orange3 = OrangePills(transl(0,-0.4,0.03));
+       Orange1 = OrangePills(transl(0,-0.1,0.03));  
+       Orange2 = OrangePills(transl(0,-0.175,0.03));
+       Orange3 = OrangePills(transl(0,-0.25,0.03));
        
-       Purple1 = PurplePills(transl(-0.25,-0.2,0.03));  
-       Purple2 = PurplePills(transl(-0.25,-0.3,0.03));
-       Purple3 = PurplePills(transl(-0.25,-0.4,0.03));
-       
-       
-q1 = dobot.model.getpos;
-q2 = dobot.model.ikcon(Green1.GreenPillsPose);
-qMatrix = jtraj(q1,q2,50);
+    
+        Greenselect1 = 0;
+        Purpleselect1 = 0;
+        Orangeselect1 = 0;
+        Greencounter = 0;
+        Purplecounter = 0;
+        Orangecounter = 0;
+        
+    if traj == 1 %1 green
+         q1 = dobot.model.getpos;
+         q2 = dobot.model.ikcon(Green1.GreenPillsPose);
+         qMatrix = jtraj(q1,q2,50);
 
-
-for i = 1:50
-    dobot.model.animate(qMatrix(i,:));                                    % Moving the robot near the GreenBlock
-    drawnow();
-end
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
 
 
         q1 = dobot.model.getpos;
         q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
         qMatrix5 = jtraj(q1,q2,50);
         
-for i = 1:50                                                       %% Plot the moving of robot 1 to build wall
+        for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
             newPose1 = dobot.model.fkine(qMatrix5(i,:));
             Green1.move(newPose1);            
             drawnow();
-end   
+        end
+        end 
 
-end
+    if traj == 2 % 2 green
 
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Green1.GreenPillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Green1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        
+            q1 = dobot.model.getpos; %pill bottle 2
+            q2 = dobot.model.ikcon(Green2.GreenPillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Green2.move(newPose1);            
+            drawnow();
+        end %end pill bottle 2
+        
+    end 
+            if traj == 3 % 3 green
 
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Green1.GreenPillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Green1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        
+            q1 = dobot.model.getpos; %pill bottle 2
+            q2 = dobot.model.ikcon(Green2.GreenPillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Green2.move(newPose1);            
+            drawnow();
+        end %end pill bottle 2
+        
+            q1 = dobot.model.getpos; %pill bottle 3
+            q2 = dobot.model.ikcon(Green3.GreenPillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Green3.move(newPose1);            
+            drawnow();
+        end %end pill bottle 3
+            end 
+        if traj == 4 % 1 Purple
+
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Purple1.PurplePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Purple1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        end 
+        if traj == 5 % 3 Purple
+
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Purple1.PurplePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Purple1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        
+            q1 = dobot.model.getpos; %pill bottle 2
+            q2 = dobot.model.ikcon(Purple2.PurplePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Purple2.move(newPose1);            
+            drawnow();
+        end %end pill bottle 2
+        end 
+        if traj == 6 % 3 Purple
+
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Purple1.PurplePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Purple1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        
+            q1 = dobot.model.getpos; %pill bottle 2
+            q2 = dobot.model.ikcon(Purple2.PurplePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Purple2.move(newPose1);            
+            drawnow();
+        end %end pill bottle 2
+        
+            q1 = dobot.model.getpos; %pill bottle 3
+            q2 = dobot.model.ikcon(Purple3.PurplePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Purple3.move(newPose1);            
+            drawnow();
+        end %end pill bottle 3
+        end 
+        if traj == 7 % 1 Orange
+
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Orange1.OrangePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Orange1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        end 
+        if traj == 8 % 2 Orange
+
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Orange1.OrangePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Orange1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        
+            q1 = dobot.model.getpos; %pill bottle 2
+            q2 = dobot.model.ikcon(Orange2.OrangePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Orange2.move(newPose1);            
+            drawnow();
+        end %end pill bottle 2
+        end 
+        if traj == 9 % 3 Orange
+
+            q1 = dobot.model.getpos; %pill bottle 1
+            q2 = dobot.model.ikcon(Orange1.OrangePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Orange1.move(newPose1);            
+            drawnow();
+        end %end pill bottle 1
+        
+            q1 = dobot.model.getpos; %pill bottle 2
+            q2 = dobot.model.ikcon(Orange2.OrangePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Orange2.move(newPose1);            
+            drawnow();
+        end %end pill bottle 2
+        
+            q1 = dobot.model.getpos; %pill bottle 3
+            q2 = dobot.model.ikcon(Orange3.OrangePillsPose);
+            qMatrix = jtraj(q1,q2,50);
+        for i = 1:50
+        dobot.model.animate(qMatrix(i,:)); % Moving the robot to pill bottle
+        drawnow();
+        end
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            qMatrix5 = jtraj(q1,q2,50);
+        for i = 1:50
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Orange3.move(newPose1);            
+            drawnow();
+        end %end pill bottle 3
+        end 
+    end
     end
 end
