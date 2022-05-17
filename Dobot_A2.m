@@ -1,274 +1,85 @@
 classdef Dobot_A2 < handle
     properties
+        %> robot model
         model;
-        simulation;
-        eStop = false;
-        toolOffset = transl(0.06,0,0.065);
-        workspace = [-0.5 0.5 -0.5 0.5 -0.7814 0.5];
-        qNeutral = [0,deg2rad(45),deg2rad(90),deg2rad(45),0];
-        qSimulation = [0,deg2rad(45),deg2rad(90),deg2rad(45)];
-        draw = 0;
+        
+        workspace = [-1 1 -1 1 -0.3 1]; 
+%         q = [0 pi/4 pi/2 pi/4 0];
+        q = [0 pi/4 pi/4 0 0];
+%         q = [0 0 0 0 0];
     end
-    methods
-        %% Constructor
-        function self = Dobot_A2()
-            location = transl(0,0,0);
-            CreateDobot(self,location);
-            %rosinit('http://localhost:11311');
+    
+    methods (Static)%% Calculation for robot pose
+%% Calculate q4
+function CalculateQ4()
+    q4 = pi - q2 - q3;
+end
+    end
+
+    methods%% Class for Dobot simulation
+function self = Dobot_A2
+    self.GetDobot();
+    self.PlotAndColourRobot();
+%     self.PlotLimits();
+end
+%% Dobot model
+function GetDobot(self)
+    L1 = Link('d',0,       'a',0,       'alpha',-pi/2);
+    L2 = Link('d',0,       'a',0.135,   'alpha',0);
+    L3 = Link('d',0,       'a',0.147,   'alpha',0);
+    L4 = Link('d',0,       'a',0.06,    'alpha',pi/2);
+    L5 = Link('d',-0.06,   'a',0,       'alpha',0);
+    
+    L1.qlim = [-135 135]*pi/180;
+    L2.qlim = [5 80]*pi/180;
+    L3.qlim = [15 170]*pi/180;
+    L4.qlim = [-90 90]*pi/180;
+    L5.qlim = [-85 85]*pi/180;
+    
+    L2.offset = -pi/2;
+    L3.offset = pi/4;
+    L4.offset = -pi/4;
+      
+    self.model = SerialLink([L1 L2 L3 L4 L5],'name','Dobot');
+    self.model.base = self.model.base * transl(0,0,0.2);
+%    self.model.plot(self.q)
+end
+%% PlotAndColourRobot
+% Given a robot index, add the glyphs (vertices and faces) and
+% colour them in if data is available 
+function PlotAndColourRobot(self)%robot,workspace)
+    for linkIndex = 0:self.model.n
+        [ faceData, vertexData, plyData{linkIndex+1} ] = plyread(['DobotLink',num2str(linkIndex),'.ply'],'tri'); %#ok<AGROW>
+        self.model.faces{linkIndex+1} = faceData;
+        self.model.points{linkIndex+1} = vertexData;
+    end
+
+    % Display robot
+    self.model.plot3d(self.q,'noarrow','workspace',self.workspace);
+    if isempty(findobj(get(gca,'Children'),'Type','Light'))
+        camlight
+    end  
+    self.model.delay = 0;
+
+    % Try to correctly colour the arm (if colours are in ply file data)
+    for linkIndex = 0:self.model.n
+        handles = findobj('Tag', self.model.name);
+        h = get(handles,'UserData');
+        try 
+            h.link(linkIndex+1).Children.FaceVertexCData = [plyData{linkIndex+1}.vertex.red ...
+                                                          , plyData{linkIndex+1}.vertex.green ...
+                                                          , plyData{linkIndex+1}.vertex.blue]/255;
+            h.link(linkIndex+1).Children.FaceColor = 'interp';
+        catch ME_1
+            disp(ME_1);
+            continue;
         end
-        %% E-stop function
-        function Stopcheck(self)
-            while(self.eStop == true)
-                disp('E-stop initialised');
-                pause(0.05);
-            end
-        end
-        %% Creating the Dobot both model with attachment and simulation
-        function CreateDobot(self, location)
-            
-            pause(0.001);
-            
-            name = ['Dobot',datestr(now,'yyyymmddTHHMMSSFFF')];
-            L1 = Link('d',0.137,'a',0,'alpha',-pi/2,'offset',0,'qlim', deg2rad([-135 135]));
-            L2 = Link('d',0,'a',0.1393,'alpha',0,'offset',-pi/2, 'qlim', deg2rad([5 80]));
-            L3 = Link('d',0,'a',0.16193,'alpha',0,'offset',0, 'qlim', deg2rad([15 170])); %pi/2 –q2 actual offset
-            L4 = Link('d',0,'a',0.0597,'alpha',pi/2,'offset',-pi/2, 'qlim', [-pi/2 pi/2]);
-            L5 = Link('d',0,'a',0,'alpha',0,'offset',0, 'qlim', deg2rad([-85 85]));
-            self.model = SerialLink([L1 L2 L3 L4 L5], 'name', name);
-            
-            pause(0.001);
-            
-            name = ['DobotMovementSimulation'];
-            L1 = Link('d',0.137,'a',0,'alpha',-pi/2,'offset',0,'qlim', deg2rad([-135 135]));
-            L2 = Link('d',0,'a',0.1393,'alpha',0,'offset',-pi/2, 'qlim', deg2rad([5 80]));
-            L3 = Link('d',0,'a',0.16193,'alpha',0,'offset',0, 'qlim', deg2rad([15 170])); %pi/2 –q2 actual offset
-            L4 = Link('d',0,'a',0.0597,'alpha',pi/2,'offset',-pi/2, 'qlim', [-pi/2 pi/2]);
-            self.simulation = SerialLink([L1 L2 L3 L4], 'name', name);
-            
-            self.model.base = location;
-            self.simulation.base = location;
-        end
-%         %% Plot Stick figure of the robot
-%         function PlotRobot(self,location)
-%             self.model.base = location;
-%             self.model.plot(self.qNeutral);
-%         end
-        %% Plot 3D model code
-        function PlotModel3d(self)
-            for linkIndex = 0:self.model.n
-                [ faceData, vertexData, plyData{linkIndex + 1} ] = plyread(['dobotLink',num2str(linkIndex),'.ply'],'tri');
-                self.model.faces{linkIndex + 1} = faceData;
-                self.model.points{linkIndex + 1} = vertexData;
-            end
-            self.model.plot3d(self.qNeutral,'noarrow','workspace',self.workspace);
-            if isempty(findobj(get(gca,'Children'),'Type','Light'))
-                camlight
-            end
-            self.model.delay = 0;
-            for linkIndex = 0:self.model.n
-                handles = findobj('Tag', self.model.name);
-                h = get(handles,'UserData');
-                try
-                    h.link(linkIndex+1).Children.FaceVertexCData = [plyData{linkIndex+1}.vertex.red ...
-                        , plyData{linkIndex+1}.vertex.green ...
-                        , plyData{linkIndex+1}.vertex.blue]/255;
-                    h.link(linkIndex+1).Children.FaceColor = 'interp';
-                catch ME_1
-                    disp(ME_1);
-                    continue;
-                end
-            end
-        end
-        %% Plot 3D simulation Dobot - no attachments
-        function PlotSimulation3d(self)
-            for linkIndex = 0:self.simulation.n
-                [ faceData, vertexData, plyData{linkIndex + 1} ] = plyread(['dobotLink',num2str(linkIndex),'.ply'],'tri');
-                self.simulation.faces{linkIndex + 1} = faceData;
-                self.simulation.points{linkIndex + 1} = vertexData;
-            end
-            self.simulation.plot3d(self.qSimulation,'noarrow','workspace',self.workspace);
-            if isempty(findobj(get(gca,'Children'),'Type','Light'))
-                camlight
-            end
-            self.simulation.delay = 0;
-            for linkIndex = 0:self.simulation.n
-                handles = findobj('Tag', self.simulation.name);
-                h = get(handles,'UserData');
-                try
-                    h.link(linkIndex+1).Children.FaceVertexCData = [plyData{linkIndex+1}.vertex.red ...
-                        , plyData{linkIndex+1}.vertex.green ...
-                        , plyData{linkIndex+1}.vertex.blue]/255;
-                    h.link(linkIndex+1).Children.FaceColor = 'interp';
-                catch ME_1
-                    disp(ME_1);
-                    continue;
-                end
-            end
-        end
-        %% Trajectory for Dobot
-        function angleMatrix = CalculateTrajectory(self,initial_q,final_q,steps)
-            scalar = lspb(0,1,steps);
-            angleMatrix = nan(steps,self.model.n);
-            for i = 1:steps
-                angleMatrix(i,:) = (1-scalar(i))*initial_q + scalar(i)*final_q;
-            end
-        end
-        %% Move Robot
-        function GoTo(self,x,y,steps,boolean)
-            
-            if(self.draw == 0)
-                z = 0.05;
-            else
-                z = 0;
-            end
-            
-            location = transl(x,y,z);
-            angle = atan(location(2,4) / location(1,4));
-            xOffset = cos(angle) * self.toolOffset(1,4);
-            yOffset = sin(angle) * self.toolOffset(1,4);
-            location = location * transl(xOffset,yOffset,self.toolOffset(3,4));
-            robotJoints = self.model.getpos();
-            newJoints = self.model.ikcon(location);
-            jointMatrix = self.CalculateTrajectory(robotJoints, newJoints, steps);
-            
-            for i = 1:steps
-                self.Stopcheck();
-                jointMatrix(i,5) = 0;
-                self.model.animate(jointMatrix(i,:));
-                if(boolean)
-                    self.DrawingSpace();
-                end
-                pause(0.02);
-                self.Stopcheck();
-            end
-        end
-        %% Dobot Requirement
-        function requirement(self)
-            load dobot_q
-            for i = 1:338
-                q1REAL = dobot_q(i,1);
-                q2REAL = dobot_q(i,2);
-                q3REAL = dobot_q(i,3);
-                q4REAL = pi - (q2REAL + q3REAL);
-                
-                q3MODEL = pi/2 - q2REAL + q3REAL;
-                q4MODEL = pi - (q2REAL + q3MODEL);
-                
-                qMove = [q1REAL,q2REAL,q3MODEL,q4MODEL];
-                self.simulation.animate(qMove);
-                drawnow();
-                pause(0.05);
-            end
-        end
-        %% Dobot move both real & simulation
-        function moveBothJoints(self, q1, q2, q3)
-            if(self.eStop == false)
-                q1REAL = q1;
-                q2REAL = q2;
-                q3REAL = q3;
-                q4REAL = pi - (q2REAL + q3REAL);
-                
-                q3MODEL = pi/2 - q2REAL + q3REAL;
-                q4MODEL = pi - (q2REAL + q3MODEL);
-                q5MODEL = 0;
-                
-                qMoveMODEL = [q1REAL,q2REAL,q3MODEL,q4MODEL, q5MODEL];
-                qMoveREAL = [q1REAL, q2REAL, q3REAL, q4REAL];                
-                
-                self.model.animate(qMoveMODEL);
-                drawnow();
-            end
-        end
-        
-        %% Dobot move both real & simulation
-        function moveBothLocation(self, x,y,z)
-            if(self.eStop == false)
-                location = transl(x,y,z);
-                robotJoints = self.model.getpos();
-                newJoints = self.model.ikcon(location);
-                
-                cartsvc_ = rossvcclient('/dobot_magician/PTP/set_cartesian_pos');
-                cartmsg_.TargetPoints=[x,y,z,0];
-                cartmsg_ = rosmessage(cartsvc_);
-                cartmsg_.TargetPoints=[x,y,z,0];
-                cartsvc_.call(cartmsg_)
-                
-                self.model.animate(newJoints);
-                drawnow();
-            end
-        end
-        
-        %% lift & lower
-        function lift(self,boolean)
-            if(boolean == true)
-                movement = transl(0,0,0.05);
-                self.draw = 0;
-            end
-            if(boolean == false)
-                movement = transl(0,0,-0.05);
-                self.draw = 1;
-            end
-            jointAngles = self.model.getpos();
-            endEffector = self.model.fkine(jointAngles);
-            endEffector = endEffector * movement;
-            NewjointAngles = self.model.ikcon(endEffector);
-            jointMatrix = self.CalculateTrajectory(jointAngles, NewjointAngles, 75);
-            for i = 1:75
-                jointMatrix(i,5) = 0;
-                self.model.animate(jointMatrix(i,:));
-                pause(0.02);
-                self.Stopcheck()
-            end
-        end
-        %%
-        function    GotoREAL(self,x,y)
-            cartsvc_ = rossvcclient('/dobot_magician/PTP/set_cartesian_pos');
-            cartmsg_ = rosmessage(cartsvc_);
-            if(self.draw == true)
-                cartmsg_.TargetPoints=[x,y,-0.08,0];
-            else
-                cartmsg_.TargetPoints=[x,y,-0.05,0];
-            end
-            cartsvc_.call(cartmsg_)
-            
-        end
-        
-        %%
-        function    GotoREALXYZ(self,x,y,z)
-            cartsvc_ = rossvcclient('/dobot_magician/PTP/set_cartesian_pos');
-            cartmsg_ = rosmessage(cartsvc_);
-                cartmsg_.TargetPoints=[x,y,z,0];
-            cartsvc_.call(cartmsg_)           
-        end
-        
-        %% LinePlaneIntersection
-        function [intersectionPoint,check] = LinePlaneIntersection(self,planeNormal,pointOnPlane,point1OnLine,point2OnLine)
-            
-            intersectionPoint = [0 0 0];
-            u = point2OnLine - point1OnLine;
-            w = point1OnLine - pointOnPlane;
-            D = dot(planeNormal,u);
-            N = -dot(planeNormal,w);
-            check = 0; %#ok<NASGU>
-            if abs(D) < 10^-7        % The segment is parallel to plane
-                if N == 0           % The segment lies in plane
-                    check = 2;
-                    return
-                else
-                    check = 0;       %no intersection
-                    return
-                end
-            end
-            
-            %compute the intersection parameter
-            sI = N / D;
-            intersectionPoint = point1OnLine + sI.*u;
-            
-            if (sI < 0 || sI > 1)
-                check= 3;          %The intersection point  lies outside the segment, so there is no intersection
-            else
-                check=1;
-            end
-        end
+    end
+end        
+%% Determine the base of the robot and plot the 3D model
+function DobotBaseAndPlot(self,position)
+    self.model.base = transl(position);
+    self.PlotAndColourRobot();
+end
     end
 end

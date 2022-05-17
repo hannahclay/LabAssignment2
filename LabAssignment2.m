@@ -6,36 +6,26 @@ classdef LabAssignment2 < handle
         pill_height = {};        
         pillMatrix = {};
 
-        end
+        Greenselect1 = 0;
+        Purpleselect1 = 0;
+        Orangeselect1 = 0;
+        
+    end
     
     methods
-function obj = LabAssignment2(tablepose,pill_1,pill_2,pill_3,pill_4,pill_5,pill_6,pill_7,pill_8,pill_9, box) %constructor
+function obj = LabAssignment2(tablepose) %constructor
 
-startpose =transl(0.4,-0.3,0);
-tablepose = transl(0,0,0); 
-
-
-    pill_1 = [0.25;-0.2;0]; % initial position of each bottle
-    pill_2 = [0.25;-0.3;0];
-    pill_3 = [0.25;-0.4;0];
-    pill_4 = [0;-0.2;0];
-    pill_5 = [0;-0.3;0];
-    pill_6 = [0;-0.4;0];
-    pill_7 = [-0.25;-0.2;0];
-    pill_8 = [-0.25;-0.3;0]; 
-    pill_9 = [-0.25;-0.4;0];
-%     box = ;
-
-
-    obj.Locationforpills(pill_1,pill_2,pill_3,pill_4,pill_5,pill_6,pill_7,pill_8,pill_9); %call placement of pills fuction
+    startpose =transl(0.4,-0.3,0);
+    tablepose = transl(0,0,0); 
     obj.GenerateEnvironment(startpose,tablepose); %call generate environment fuction
-
     disp('Press Enter to Continue');
 
     pause();
 end
 
 function GenerateEnvironment(obj,centre,tablepose)    
+    
+    %ENVIRONMENT
     [f,v,data] = plyread('table.ply','tri');
     
     % Scale the colours to be 0-to-1 (they are originally 0-to-255)
@@ -43,32 +33,14 @@ function GenerateEnvironment(obj,centre,tablepose)
     
     x_table = tablepose(1,4);
     y_table = tablepose(2,4);
-    Offset = centre(3,4) - 0.554; % table is 0.495m tall, and so this is to asjust the offset of the table so that the robot can sit on top of it
+    Offset = centre(3,4) - 0.554; % table is 0.554m tall, and so this is to asjust the offset of the table so that the robot can sit on top of it
     
     trisurf(f,v(:,1) + x_table, v(:,2) + y_table, v(:,3) + Offset,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
     hold on
     camlight;
     axis equal;
     view(3);
-    
-    
-    for i = 1:9
-        [f,v,data] = plyread('pill_bottle.ply','tri');
-        % find corner size (vertex) of the pills
-        determinesize = size(v,1);
-        %moving the origin of the pill to the top of the table
-        Originpoint = (sum(v)/determinesize); 
-        pillVertex = v - repmat(Originpoint,determinesize,1);
-        
-        % Scale the colours to be 0-to-1 (they are originally 0-to-255
-        vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
-        % Then plot the trisurf
-        obj.pillMatrix{i} = trisurf(f,pillVertex(:,1) + obj.pill_height{i}(1,4), ...
-            pillVertex(:,2) + obj.pill_height{i}(2,4), pillVertex(:,3) + (0.06671/2), ...
-            'FaceVertexCData',vertexColours,'EdgeColor', 'interp','EdgeLighting','flat');
-    end
-    
-    
+
     
     [f,v,data] = plyread('fire_extinguisher.ply','tri');
     % Scale the colours to be 0-to-1 (they are originally 0-to-255)
@@ -82,40 +54,55 @@ function GenerateEnvironment(obj,centre,tablepose)
        
        surf([0.1,-0.1;0.1,-0.1],[0.1,0.1;0.2,0.2],[0,0;0,0],...
        'CData',imread('pick_up_sign.jpg'),'FaceColor','texturemap');
+  %ENVIRONMENT
   
+  %Generating pills and robot
        disp('Generating Dobot');
-       dobot = Dobot_A2();                                                       
-       dobot.PlotModel3d();
-       disp('lifting');
-       dobot.lift(true);
-       pause(0.5); 
-       disp('lowering');
-       dobot.lift(false); 
-            
+       dobot = Dobot_A2;
+       qHome1 = dobot.model.getpos;
+       
+%        Boxrot = BoxClass(transl(0,0,0));  
+       Boxinitpos = BoxClass(transl(0.25,0,0.03));  
+       
+       
+       Green1 = GreenPills(transl(0.25,-0.2,0.03));  %0.03 is the height of the pill bottle, translating so that they sit on top of the table
+       Green2 = GreenPills(transl(0.25,-0.3,0.03));
+       Green3 = GreenPills(transl(0.25,-0.4,0.03));
+       
+       Orange1 = OrangePills(transl(0,-0.2,0.03));  
+       Orange2 = OrangePills(transl(0,-0.3,0.03));
+       Orange3 = OrangePills(transl(0,-0.4,0.03));
+       
+       Purple1 = PurplePills(transl(-0.25,-0.2,0.03));  
+       Purple2 = PurplePills(transl(-0.25,-0.3,0.03));
+       Purple3 = PurplePills(transl(-0.25,-0.4,0.03));
+       
+       
+       
+q1 = dobot.model.getpos;
+q2 = dobot.model.ikcon(Green1.GreenPillsPose);
+qMatrix = jtraj(q1,q2,50);
+
+
+for i = 1:50
+    dobot.model.animate(qMatrix(i,:));                                    % Moving the robot near the GreenBlock
+    drawnow();
 end
 
-function Locationforpills(object,pill_1,pill_2,pill_3,pill_4,pill_5,pill_6,pill_7,pill_8,pill_9)
-    
-    object.pill_height{1} = pill_1; %create instance of each pill as an object
-    object.pill_height{2} = pill_2;
-    object.pill_height{3} = pill_3;
-    object.pill_height{4} = pill_4;
-    object.pill_height{5} = pill_5;
-    object.pill_height{6} = pill_6;
-    object.pill_height{7} = pill_7;
-    object.pill_height{8} = pill_8;
-    object.pill_height{9} = pill_9;
-    
-    position = eye(4); %create positions as a 4x4 matrix
-    position = position(1:4,1:3); 
 
-    for i= 1:9
-        object.pill_height{i} = [[object.pill_height{i}]; 1];
-        object.pill_height{i} = [[position] [object.pill_height{i}]];
-    end
-    clc;
-    
+        q1 = dobot.model.getpos;
+        q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+        qMatrix5 = jtraj(q1,q2,50);
+        
+for i = 1:50                                                       %% Plot the moving of robot 1 to build wall
+            dobot.model.animate(qMatrix5(i,:));
+            newPose1 = dobot.model.fkine(qMatrix5(i,:));
+            Green1.move(newPose1);            
+            drawnow();
+end   
+
 end
+
 
     end
 end
