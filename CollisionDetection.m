@@ -18,10 +18,8 @@ classdef CollisionDetection < handle
 
             startpose =transl(0.4,-0.3,0);
             tablepose = transl(0,0,0);
-            disp('Generating Dobot'); %generating robot
-            dobot = Dobot_A2;
             obj.GenerateEnvironment(startpose,tablepose); %call generate environment fuction
-            obj.detection(dobot);
+            obj.detection;
 
             pause();
         end
@@ -48,9 +46,13 @@ classdef CollisionDetection < handle
 
         end
 
-        function detection(obj,dobot)
+        function detection(obj)
+            %initlaising the robot
+            disp('Generating Dobot'); %generating robot
+            dobot = Dobot_A2;
             q = dobot.model.getpos;
-            % 2.2 and 2.3
+
+            % initilaising the box to collide with
             centerpnt = [0.27,0,0];
             side = 0.1;
             plotOptions.plotFaces = true;
@@ -59,15 +61,15 @@ classdef CollisionDetection < handle
             camlight
 
 
-            tr =zeros(4,4,6); % initialise the transfor as a 4x4, and 6 -> number of joints +1
-            tr(:,:,1) =robot.base;
-            L = robot.links
+            tr =zeros(4,4,6); % initialise the transform as a 4x4, and 6 -> number of joints +1
+            tr(:,:,1) =dobot.model.base;
+            L = dobot.model.links
             for i = 1 : 5 % between the links --> has 5 links
                 tr(:,:,i+1) = tr(:,:,i) * trotz(q(i)+L(i).offset) * transl(0,0,L(i).d) * transl(L(i).a,0,0) * trotx(L(i).alpha)
             end
 
-            % 2.5: Go through each link and also each triangle face
-            for i = 1 : size(tr,5)-1
+            
+            for i = 1 : size(tr,5)-1    % Go through each link and also each triangle face
                 for faceIndex = 1:size(faces,1)
                     vertOnPlane = vertex(faces(faceIndex,1)',:);
                     [intersectP,check] = LinePlaneIntersection(faceNormals(faceIndex,:),vertOnPlane,tr(1:3,4,i)',tr(1:3,4,i+1)');
@@ -78,16 +80,16 @@ classdef CollisionDetection < handle
                 end
             end
 
-            % 2.6: Go through until there are no step sizes larger than 1 degree
-            q1 = robot.getpos;
-            q2 = robot.ikcon(transl(0.2,0.1,0.03) );
+           % Going through until there are no step sizes larger than 1 degree 
+            q1 = dobot.model.getpos;
+            q2 = dobot.model.ikcon(transl(0.2,0.1,0.03) );
             steps = 2;
             while ~isempty(find(1 < abs(diff(rad2deg(jtraj(q1,q2,steps)))),1))
                 steps = steps + 1;
             end
             qMatrix = jtraj(q1,q2,steps)
 
-            % 2.7
+            % Checking each of the joint states in the trajectory to work out which ones are in collision
             result = true(steps,1);
             for i = 1: steps
                 result(i) = IsCollision(robot,qMatrix(i,:),faces,vertex,faceNormals,false);
