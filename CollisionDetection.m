@@ -18,57 +18,50 @@ classdef CollisionDetection < handle
             rad = (pi/3);
             startpose =transl(0.4,-0.3,0);
             tablepose = transl(0,0,0);
-            % obj.GenerateEnvironment(startpose,tablepose); %call generate environment fuction
+            obj.GenerateEnvironment(startpose,tablepose); %call generate environment fuction
             obj.detection(rad);
             disp("END");
-            pause();
         end
 
         function GenerateEnvironment(obj,centre,tablepose)
 
-            %ENVIRONMENT
             [f,v,data] = plyread('table.ply','tri');
+
             % Scale the colours to be 0-to-1 (they are originally 0-to-255)
             vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+
             x_table = tablepose(1,4);
             y_table = tablepose(2,4);
             Offset = centre(3,4) - 0.554; % table is 0.554m tall, and so this is to asjust the offset of the table so that the robot can sit on top of it
+
             trisurf(f,v(:,1) + x_table, v(:,2) + y_table, v(:,3) + Offset,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
             hold on
             camlight;
             axis equal;
             view(3);
 
-            surf([0.1,-0.1;0.1,-0.1],[0.1,0.1;0.2,0.2],[0,0;0,0],...
+
+            [f,v,data] = plyread('fire_extinguisher.ply','tri');
+            % Scale the colours to be 0-to-1 (they are originally 0-to-255)
+            vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+            % Then plot the trisurf
+            trisurf(f,v(:,1) - 1, v(:,2) - 1, v(:,3) + 0 ,'FaceVertexCData',...
+                vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+
+            surf([-1.5,-1.5;1.5,1.5],[-1,1;-1,1],[-0.5,-0.5;-0.5,-0.5],...
+                'CData',imread('concrete.jpg'),'FaceColor','texturemap');
+
+            surf([0.3,0.1;0.3,0.1],[0.55,0.55;0.55,0.55],[0,0;-0.1,-0.1],...
                 'CData',imread('pick_up_sign.jpg'),'FaceColor','texturemap');
 
-            % dobot = Dobot_A2;
-            %             mdl_planar3;
-            %
-            %             [v,f,fn] = RectangularPrism([2,-1.1,-1], [3,1.1,1]);
-            %             steps = 50;
-            %             q1 = [pi/3,0,0];
-            %             q2 = [-pi/3,0,0];
-            %             %%%%%%%%%%%%%%% DO NOT CHANGE %%%%%%%%%%%%%%%%
-            %             %hold on
-            %             qMatrix = jtraj(q1,q2,steps);
-            %             for i = 1:steps
-            %                 result = IsCollision(p3,qMatrix(i,:),f,v,fn);
-            %                 if result == 1
-            %                     qMatrix(i,:)
-            %                     p3.plot(q1);
-            %                     pause(3);
-            %                     p3.animate(qMatrix(1:i,:));
-            %                     break
-            %                 end
-            %             end
         end
+
 
         function detection(obj,rad)
 
             dobot = Dobot_A2;
-            robot = dobot.model;
 
+            robot = dobot.model;
             centerpnt = [0.25,0.15,0.1];
             side = 0.1;
             plotOptions.plotFaces = true;
