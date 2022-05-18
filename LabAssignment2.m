@@ -120,7 +120,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -153,7 +153,7 @@ function PickUpTrajectory(obj,traj)
         for i = 1:50
             dobot.model.animate(qMatrix6(i,:));
             newPose1 = dobot.model.fkine(qMatrix6(i,:));
-            Green1.move(newPose1);
+            Green1.move(newPose1*transl(0,0.075,0));
             Green2.move(newPose1);
             Boxinitpos.move(newPose1);
             drawnow();
@@ -169,7 +169,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -186,7 +186,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(-0.075,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -211,7 +211,7 @@ function PickUpTrajectory(obj,traj)
             Green3.move(newPose1);            
             drawnow();
         end %end pill bottle 3
-                finalpos = transl(0.25,0.34,0.09);
+        finalpos = transl(0.25,0.34,0.09);
         q1 = dobot.model.getpos;
         q2 = dobot.model.ikcon(finalpos);
         qMatrix6 = jtraj(q1,q2,50);
@@ -219,8 +219,8 @@ function PickUpTrajectory(obj,traj)
         for i = 1:50
             dobot.model.animate(qMatrix6(i,:));
             newPose1 = dobot.model.fkine(qMatrix6(i,:));
-            Green1.move(newPose1);
-            Green2.move(newPose1);
+            Green1.move(newPose1*transl(0,0.075,0));
+            Green2.move(newPose1*transl(-0.075,0.075,0));
             Green3.move(newPose1);
             Boxinitpos.move(newPose1);
             drawnow();
@@ -268,7 +268,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -301,7 +301,7 @@ function PickUpTrajectory(obj,traj)
         for i = 1:50
             dobot.model.animate(qMatrix6(i,:));
             newPose1 = dobot.model.fkine(qMatrix6(i,:));
-            Purple1.move(newPose1);
+            Purple1.move(newPose1*transl(0,0.075,0));
             Purple2.move(newPose1);
             Boxinitpos.move(newPose1);
             drawnow();
@@ -317,7 +317,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -334,7 +334,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0.075,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -367,8 +367,8 @@ function PickUpTrajectory(obj,traj)
         for i = 1:50
             dobot.model.animate(qMatrix6(i,:));
             newPose1 = dobot.model.fkine(qMatrix6(i,:));
-            Purple1.move(newPose1);
-            Purple2.move(newPose1);
+            Purple1.move(newPose1*transl(0,0.075,0));
+            Purple2.move(newPose1*transl(0.075,0.075,0));
             Purple3.move(newPose1);
             Boxinitpos.move(newPose1);
             drawnow();
@@ -415,7 +415,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -448,7 +448,7 @@ function PickUpTrajectory(obj,traj)
         for i = 1:50
             dobot.model.animate(qMatrix6(i,:));
             newPose1 = dobot.model.fkine(qMatrix6(i,:));
-            Orange1.move(newPose1);
+            Orange1.move(newPose1*transl(0,0.075,0));
             Orange2.move(newPose1);
             Boxinitpos.move(newPose1);
             drawnow();
@@ -464,7 +464,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -481,7 +481,7 @@ function PickUpTrajectory(obj,traj)
         drawnow();
         end
             q1 = dobot.model.getpos;
-            q2 = dobot.model.ikcon(Boxinitpos.BoxPose);
+            q2 = dobot.model.ikcon(Boxinitpos.BoxPose*transl(0.075,0.075,0));
             qMatrix5 = jtraj(q1,q2,50);
         for i = 1:50
             dobot.model.animate(qMatrix5(i,:));
@@ -514,8 +514,8 @@ function PickUpTrajectory(obj,traj)
         for i = 1:50
             dobot.model.animate(qMatrix6(i,:));
             newPose1 = dobot.model.fkine(qMatrix6(i,:));
-            Orange1.move(newPose1);
-            Orange2.move(newPose1);
+            Orange1.move(newPose1*transl(0,0.075,0));
+            Orange2.move(newPose1*transl(0.075,0.075,0));
             Orange3.move(newPose1);
             Boxinitpos.move(newPose1);
             drawnow();
