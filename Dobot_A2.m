@@ -2,7 +2,7 @@ classdef Dobot_A2 < handle
     properties
         %> robot model
         model;
-        workspace = [-1 1 -1 1 -0.3 1]; 
+        workspace = [-1 1 -1 1 -0.555 1]; 
         q = [0 pi/4 pi/4 0 0];
     end
     
@@ -12,7 +12,6 @@ function CalculateQ4()
     q4 = pi - q2 - q3;
 end
     end
-
     methods%% Class for Dobot simulation
 function self = Dobot_A2
     self.GetDobot();
@@ -46,18 +45,17 @@ end
 % colour them in if data is available 
 function PlotAndColourRobot(self)%robot,workspace)
     for linkIndex = 0:self.model.n
-        [ faceData, vertexData, plyData{linkIndex+1} ] = plyread(['dobotLink',num2str(linkIndex),'.ply'],'tri'); %#ok<AGROW>
+       [ faceData, vertexData, plyData{linkIndex+1} ] = plyread(['dobotLink',num2str(linkIndex),'.ply'],'tri'); %#ok<AGROW>
         self.model.faces{linkIndex+1} = faceData;
         self.model.points{linkIndex+1} = vertexData;
     end
-
     % Display robot
-    self.model.plot3d(self.q,'noarrow','workspace',self.workspace);
+    self.workspace
+    self.model.plot3d(self.q,'noarrow','workspace',self.workspace, 'tile1color',[1 1 1 ]);
     if isempty(findobj(get(gca,'Children'),'Type','Light'))
         camlight
     end  
     self.model.delay = 0;
-
     % Try to correctly colour the arm (if colours are in ply file data)
     for linkIndex = 0:self.model.n
         handles = findobj('Tag', self.model.name);

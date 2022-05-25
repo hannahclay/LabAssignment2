@@ -40,10 +40,10 @@ classdef LabAssignment2 < handle
             % Scale the colours to be 0-to-1 (they are originally 0-to-255)
             vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
             % Then plot the trisurf
-            trisurf(f,v(:,1) - 1, v(:,2) - 1, v(:,3) + 0 ,'FaceVertexCData',...
+            trisurf(f,v(:,1) - 1, v(:,2) - 0.6, v(:,3) - 0.1 ,'FaceVertexCData',...
                 vertexColours,'EdgeColor','interp','EdgeLighting','flat');
 
-            surf([-1.5,-1.5;1.5,1.5],[-1,1;-1,1],[-0.5,-0.5;-0.5,-0.5],...
+            surf([-1.5,-1.5;1.5,1.5],[-1,1;-1,1],[-0.55,-0.55;-0.555,-0.55],...
                 'CData',imread('concrete.jpg'),'FaceColor','texturemap');
 
             surf([0.3,0.1;0.3,0.1],[0.55,0.55;0.55,0.55],[0,0;-0.1,-0.1],...
@@ -112,8 +112,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -176,8 +175,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -255,8 +253,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -297,8 +294,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -358,8 +354,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -436,8 +431,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -478,8 +472,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -538,8 +531,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -616,8 +608,7 @@ classdef LabAssignment2 < handle
                 %Return back to home once finished
                 q1 = dobot.model.getpos;
                 q2 = qHome1;
-                disp(q1)
-                disp(q2)
+                disp("Moving to home position")
                 qMatrix = jtraj(q1,q2,50);
 
                 for i = 1:50
@@ -628,38 +619,3 @@ classdef LabAssignment2 < handle
         end
     end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
