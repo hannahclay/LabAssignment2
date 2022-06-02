@@ -35,7 +35,6 @@ classdef LabAssignment2 < handle
             axis equal;
             view(3);
 
-
             [f,v,data] = plyread('fire_extinguisher.ply','tri');
             % Scale the colours to be 0-to-1 (they are originally 0-to-255)
             vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
@@ -43,19 +42,48 @@ classdef LabAssignment2 < handle
             trisurf(f,v(:,1) - 1, v(:,2) - 0.6, v(:,3) - 0.1 ,'FaceVertexCData',...
                 vertexColours,'EdgeColor','interp','EdgeLighting','flat');
 
+            [f,v,data] = plyread('estop.ply','tri');
+            % Scale the colours to be 0-to-1 (they are originally 0-to-255)
+            vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+            % Then plot the trisurf
+            trisurf(f,v(:,1) - 0.52, v(:,2) + 0.54, v(:,3) -0.09,'FaceVertexCData',...
+                vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+
+            [f,v,data] = plyread('lightcurtain.ply','tri');
+            % Scale the colours to be 0-to-1 (they are originally 0-to-255)
+            vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+            % Then plot the trisurf
+            trisurf(f,v(:,1) - 0.55, v(:,2) + 0.32, v(:,3),'FaceVertexCData',...
+                vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+
+            [f,v,data] = plyread('lightcurtain.ply','tri');
+            % Scale the colours to be 0-to-1 (they are originally 0-to-255)
+            vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+            % Then plot the trisurf
+            trisurf(f,v(:,1) + 0.52, v(:,2) + 0.32, v(:,3) ,'FaceVertexCData',...
+                vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+
+            [f,v,data] = plyread('railing.ply','tri');
+            % Scale the colours to be 0-to-1 (they are originally 0-to-255)
+            vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+            % Then plot the trisurf
+            trisurf(f,v(:,1) - 0.6, v(:,2) +5.25, v(:,3) -0.33,'FaceVertexCData',...
+                vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+
             surf([-1.5,-1.5;1.5,1.5],[-1,1;-1,1],[-0.55,-0.55;-0.555,-0.55],...
                 'CData',imread('concrete.jpg'),'FaceColor','texturemap');
 
-            surf([0.3,0.1;0.3,0.1],[0.55,0.55;0.55,0.55],[0,0;-0.1,-0.1],...
+            surf([0.3,0.1;0.3,0.1],[0.526,0.526;0.526,0.526],[0,0;-0.1,-0.1],...
                 'CData',imread('pick_up_sign.jpg'),'FaceColor','texturemap');
 
+            camlight;
         end
 
         function PickUpTrajectory(obj,traj)
 
             disp('Generating Dobot'); %generating robot
             dobot = Dobot_A2;
-            qHome1 = [0 0.7854 0.7854 0 0];
+            qHome1 = dobot.model.getpos;
 
             Boxinitpos = BoxClass(transl(0.25,0.1,0.09));
 
